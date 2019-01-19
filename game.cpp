@@ -5,6 +5,8 @@
 
 #define SCALE 20
 
+const unsigned int A = 2048;
+
 Chip8 chip8;
 
 int main() {
@@ -27,8 +29,7 @@ int main() {
     chip8.emulateCycle();
     
     window.clear();
-    std::cout << chip8.getScreen() << std::endl;
-
+    
     if (chip8.drawFlag) {
       std::cout << "imprimir\n";
     }

@@ -1,9 +1,10 @@
-#define MEMORY_ADDRESS_START 0x200
-#define SCREEN_WIDTH 64
-#define SCREEN_HEIGHT 32
-
 #ifndef CHIP8_H
 #define CHIP8_H
+
+#define MEMORY_ADDRESS_START 0x200
+const int SCREEN_WIDTH = 64;
+const int SCREEN_HEIGHT = 32;
+const int SCREEN_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT;
 
 class Chip8 {
  private:
@@ -22,9 +23,6 @@ class Chip8 {
   // program counter
   unsigned short pc;
 
-  // 64x32 pixels
-  unsigned char screen[SCREEN_WIDTH * SCREEN_HEIGHT];
-
   // delay and sound timer registers that count at 60 hz
   unsigned char delayTimer;
   unsigned char soundTimer;
@@ -41,16 +39,14 @@ class Chip8 {
   Chip8();
   ~Chip8();
 
+  unsigned char screen[SCREEN_SIZE];
+
   bool drawFlag;
-  
-  unsigned char* getScreen() {
-    return screen;
-  }
-  
+    
   void initialize();
   void emulateCycle();
 
   
 };
 
-#endif
+#endif // CHIP8_H

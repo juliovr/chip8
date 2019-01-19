@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <bitset>
 
 #include "chip8.h"
 
@@ -17,10 +18,12 @@ void Chip8::initialize() {
   I      = 0; // Reset index register
   sp     = 0; // Reset stack pointer
 
+  std::cout << "Init" << std::endl;
+  
   drawFlag = false;
   
   // load program
-  std::ifstream ifs("/home/julio/Downloads/BMP Viewer - Hello (C8 example) [Hap, 2005].ch8", std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+  std::ifstream ifs("/home/julio/Downloads/pong2.c8", std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 
   int length = ifs.tellg();
   ifs.seekg(0, ifs.beg);
@@ -63,8 +66,14 @@ void Chip8::emulateCycle() {
   case 0x0000: // 0NNN, 00E0, 00EE
     switch (opcode & 0x000F) {
     case 0x0000: // 00E0
-      // TODO
-      pc += 2;
+      {
+	drawFlag = true;
+	for (int i = 0; i < SCREEN_SIZE; i++) {
+	  screen[i] = 0x0;
+	}
+	
+	pc += 2;	
+      }
       break;
 
     case 0x000E: // 00EE
@@ -191,8 +200,10 @@ void Chip8::emulateCycle() {
 
   case 0x9000: // 9XY0
     if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
-      pc += 4;
+      pc += 2;
     }
+
+    pc += 2;
     break;
     
   case 0xA000: // ANNN
@@ -210,12 +221,34 @@ void Chip8::emulateCycle() {
 
   case 0xD000: // DXYN
     {
-      unsigned char width = 8;
-      unsigned char height = opcode & 0x000F;
+      unsigned short width = 8;
+      unsigned short height = (unsigned char) (opcode & 0x000F);
+      unsigned short x = V[(opcode & 0x0F00) >> 8];
+      unsigned short y = V[(opcode & 0x00F0) >> 4];
 
-      drawFlag = true;
+      unsigned short byteSprite;
+
       
-      // TODO implement draw function
+      drawFlag = true;
+
+      for (int row = 0; row < height; row++) {
+        byteSprite = memory[I + row];
+
+	for (int col = 0; col < width; col++) {
+          // used in tutorial, is really necessary?
+          //unsigned short bit = (0x80 >> col);
+
+          unsigned short bitToReplace = ((SCREEN_WIDTH * (y + row)) + x + col);
+
+          // Collision
+          if (screen[bitToReplace] == 1)
+            V[0xF] = 1;
+          
+          screen[bitToReplace] ^= 1;
+        }
+      }
+
+      pc += 2;
     }
     break;
 
@@ -254,7 +287,8 @@ void Chip8::emulateCycle() {
       break;
 
     case 0x001E: // FX1E
-      // TODO
+      I += V[(opcode & 0x0F00) >> 8];
+      pc += 2;
       break;
 
     case 0x0029: // FX29
