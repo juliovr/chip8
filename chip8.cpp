@@ -222,29 +222,26 @@ void Chip8::emulateCycle() {
   case 0xD000: // DXYN
     {
       unsigned short width = 8;
-      unsigned short height = (unsigned char) (opcode & 0x000F);
+      unsigned short height = opcode & 0x000F;
       unsigned short x = V[(opcode & 0x0F00) >> 8];
       unsigned short y = V[(opcode & 0x00F0) >> 4];
 
-      unsigned short byteSprite;
-
-      
       drawFlag = true;
-
+      V[0xF] = 0;
+      
       for (int row = 0; row < height; row++) {
-        byteSprite = memory[I + row];
+        unsigned short byteSprite = memory[I + row];
+        std::cout << "byteSprite: " << std::bitset<8>(byteSprite) << std::endl;
 
 	for (int col = 0; col < width; col++) {
-          // used in tutorial, is really necessary?
-          //unsigned short bit = (0x80 >> col);
-
-          unsigned short bitToReplace = ((SCREEN_WIDTH * (y + row)) + x + col);
+          unsigned short bit = (0x80 >> col);
+          unsigned short position = ((SCREEN_WIDTH * (y + row)) + x + col);
 
           // Collision
-          if (screen[bitToReplace] == 1)
+          if (screen[position] == 1)
             V[0xF] = 1;
           
-          screen[bitToReplace] ^= 1;
+          screen[position] ^= bit;
         }
       }
 
@@ -271,7 +268,8 @@ void Chip8::emulateCycle() {
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007: // FX07
-      // TODO
+      V[(opcode & 0x0F00) >> 8] = delayTimer;
+      pc += 2;
       break;
 
     case 0x000A: // FX0A
@@ -279,11 +277,13 @@ void Chip8::emulateCycle() {
       break;
 
     case 0x0015: // FX15
-      // TODO
+      delayTimer = V[(opcode & 0x0F00) >> 8];
+      pc += 2;
       break;
 
     case 0x0018: //FX18
-      // TODO
+      soundTimer = V[(opcode & 0x0F00) >> 8];
+      pc += 2;
       break;
 
     case 0x001E: // FX1E
@@ -292,15 +292,30 @@ void Chip8::emulateCycle() {
       break;
 
     case 0x0029: // FX29
-      // TODO
+      I = V[(opcode & 0x0F00) >> 8] * 0x5;
+      pc += 2;
       break;
 
     case 0x0033: // FX33
-      // TODO
+      {
+        unsigned short decimalNumber = V[(opcode & 0x0F00) >> 8];
+        memory[I]     = decimalNumber / 100;
+        memory[I + 1] = (decimalNumber / 10) % 10;
+        memory[I + 2] = (decimalNumber % 10);
+      }
+
+      pc += 2;
       break;
 
     case 0x0055: // FX55
-      // TODO
+      {
+	unsigned char X = (opcode & 0x0F00) >> 8;
+	for (int i = 0; i <= X; i++) {
+	  memory[I + i] = V[i];
+	}
+
+	pc += 2;
+      }
       break;
 
     case 0x0065: // FX65
@@ -326,5 +341,15 @@ void Chip8::emulateCycle() {
   }
 
   // Update timers
+  if (delayTimer > 0) {
+    --delayTimer;
+  }
   
+  if (soundTimer > 0) {
+    if (soundTimer == 1) {
+      std::cout << "BEEP!\n";
+    }
+    
+    --soundTimer;
+  }
 }

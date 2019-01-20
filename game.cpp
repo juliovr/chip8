@@ -14,9 +14,6 @@ int main() {
 
   sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE), "Chip8 emulator");
 
-  sf::RectangleShape rectangle(sf::Vector2f(100.0f, 100.0f));
-  rectangle.setPosition(10.0f, 10.0f);
-  rectangle.setFillColor(sf::Color::White);
   
   while (window.isOpen()) {
     sf::Event event;
@@ -28,14 +25,45 @@ int main() {
 
     chip8.emulateCycle();
     
-    window.clear();
-    
     if (chip8.drawFlag) {
-      std::cout << "imprimir\n";
-    }
-    //window.draw(rectangle);
-    window.display();
+      window.clear();
 
+      for (int y = 0; y < SCREEN_HEIGHT; y++) {
+	for (int x = 0; x < SCREEN_WIDTH; x++) {
+          sf::RectangleShape rectangle(sf::Vector2f(SCALE, SCALE));
+          rectangle.setPosition(x * SCALE, y * SCALE);
+          if (chip8.screen[(y * SCREEN_HEIGHT) + x] == 1) {
+            rectangle.setFillColor(sf::Color::White);
+          } else {
+            rectangle.setFillColor(sf::Color::Black);
+          }
+          
+          window.draw(rectangle);
+        }
+      }
+
+      /*for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+          sf::RectangleShape rectangle(sf::Vector2f(SCALE, SCALE));
+          rectangle.setPosition(x * SCALE, y * SCALE);
+
+          if (x == 0)      rectangle.setFillColor(sf::Color::Black);
+          else if (x == 1) rectangle.setFillColor(sf::Color::White);
+          else if (x == 2) rectangle.setFillColor(sf::Color::Red);
+          else if (x == 3) rectangle.setFillColor(sf::Color::Green);
+          else if (x == 4) rectangle.setFillColor(sf::Color::Blue);
+          else if (x == 5) rectangle.setFillColor(sf::Color::Yellow);
+          else if (x == 6) rectangle.setFillColor(sf::Color::Magenta);
+          else if (x == 7) rectangle.setFillColor(sf::Color::Cyan);
+          
+          
+          window.draw(rectangle);
+        }
+      }*/
+      
+      window.display();
+    }
+    
   }
 
 
