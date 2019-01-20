@@ -264,11 +264,19 @@ void Chip8::emulateCycle() {
   case 0xE000: // EX9E, EXA1
     switch (opcode & 0x000F) {
     case 0x000E: // EX9E
-      // TODO
+      if (keys[V[(opcode & 0x0F00) >> 8]] != 0) {
+        pc += 2;
+      }
+
+      pc += 2;
       break;
 
     case 0x0001: // EXA1
-      // TODO
+      if (keys[V[(opcode & 0x0F00) >> 8]] == 0) {
+        pc += 2;
+      }
+
+      pc += 2;
       break;
 
     default:

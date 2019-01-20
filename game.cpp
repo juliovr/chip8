@@ -29,15 +29,16 @@ int main() {
 
       for (int y = 0; y < SCREEN_HEIGHT; y++) {
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
-          std::cout << (int) chip8.screen[(y * SCREEN_HEIGHT) + x] << std::endl;
-          
-          if (chip8.screen[(y * SCREEN_HEIGHT) + x] != 0) {
             sf::RectangleShape rectangle(sf::Vector2f(SCALE, SCALE));
             rectangle.setPosition(x * SCALE, y * SCALE);
-            rectangle.setFillColor(sf::Color::White);
 
+            if (chip8.screen[(y * SCREEN_HEIGHT) + x] != 0) {
+              rectangle.setFillColor(sf::Color::White);
+            } else {
+              rectangle.setFillColor(sf::Color::Black);
+            }
+            
             window.draw(rectangle);  
-          }
         }
       }
       
