@@ -78,6 +78,7 @@ void Chip8::emulateCycle() {
 
     case 0x000E: // 00EE
       pc = stack[--sp];
+      pc += 2;
       break;
 
     default:
@@ -216,7 +217,14 @@ void Chip8::emulateCycle() {
     break;
 
   case 0xC000: // CXNN
-    // TODO
+    {
+      srand(time(NULL));
+      unsigned short randomNumber = rand() % 256;
+
+      V[(opcode & 0x0F00) >> 8] = randomNumber & (opcode & 0x00FF);
+
+      pc += 2;
+    }
     break;
 
   case 0xD000: // DXYN
@@ -237,11 +245,15 @@ void Chip8::emulateCycle() {
           unsigned short bit = (0x80 >> col);
           unsigned short position = ((SCREEN_WIDTH * (y + row)) + x + col);
 
-          // Collision
-          if (screen[position] == 1)
-            V[0xF] = 1;
+          if ((byteSprite & bit) != 0) {
+            // Collision
+            if (screen[position] == 1) {
+              V[0xF] = 1;
+            }
+
+            screen[position] ^= 1;
+          }
           
-          screen[position] ^= bit;
         }
       }
 
