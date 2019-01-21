@@ -29,16 +29,13 @@ int main() {
 
       for (int y = 0; y < SCREEN_HEIGHT; y++) {
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
+          if (chip8.screen[(y * SCREEN_WIDTH) + x] != 0 ) {
             sf::RectangleShape rectangle(sf::Vector2f(SCALE, SCALE));
             rectangle.setPosition(x * SCALE, y * SCALE);
-
-            if (chip8.screen[(y * SCREEN_HEIGHT) + x] != 0) {
-              rectangle.setFillColor(sf::Color::White);
-            } else {
-              rectangle.setFillColor(sf::Color::Black);
-            }
+            rectangle.setFillColor(sf::Color::White);
             
-            window.draw(rectangle);  
+            window.draw(rectangle);
+          }
         }
       }
       

@@ -2,9 +2,9 @@
 #define CHIP8_H
 
 #define MEMORY_ADDRESS_START 0x200
-const int SCREEN_WIDTH = 64;
-const int SCREEN_HEIGHT = 32;
-const int SCREEN_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT;
+const unsigned int SCREEN_WIDTH = 64;
+const unsigned int SCREEN_HEIGHT = 32;
+const unsigned int SCREEN_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT;
 
 class Chip8 {
  private:
