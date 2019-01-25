@@ -2,6 +2,8 @@
 #include <fstream>
 #include <bitset>
 
+
+
 #include "chip8.h"
 
 Chip8::Chip8() {
@@ -18,9 +20,18 @@ void Chip8::initialize() {
   I      = 0; // Reset index register
   sp     = 0; // Reset stack pointer
 
-  std::cout << "Init" << std::endl;
+  std::cout << "Init\n";
   
   drawFlag = false;
+
+  // load fontset
+  for (int i = 0; i < FONT_SET_LENGTH; i++) {
+    memory[i] = fontSet[i];
+  }
+
+  // reset timers
+  delayTimer = 0;
+  soundTimer = 0;
   
   // load program
   std::ifstream ifs("/home/julio/Downloads/pong2.c8", std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
@@ -28,19 +39,19 @@ void Chip8::initialize() {
   int length = ifs.tellg();
   ifs.seekg(0, ifs.beg);
   
-  std::cout << "Reading " << length << " characters..." << std::endl;
+  std::cout << "Reading " << length << " characters...\n";
 
   char *buffer = new char[length];
   
   ifs.read(buffer, length);
 
   if (!ifs) {
-    std::cout << "Error: only " << ifs.gcount() << " could be read" << std::endl;
+    std::cout << "Error: only " << ifs.gcount() << " could be read\n";
     delete[] buffer;
     return;
   }
   
-  std::cout << "All characters read successfully." << std::endl;
+  std::cout << "All characters read successfully.\n";
   
   ifs.close();
   
@@ -54,11 +65,11 @@ void Chip8::initialize() {
 void Chip8::emulateCycle() {
   // Reset drawFlag
   drawFlag = false;
-  
+
   // Fetch opcode
   opcode = memory[pc] << 8 | memory[pc + 1];
 
-  std::cout << "Opcode to execute: " << std::hex << opcode << std::endl;
+  std::cout << "Opcode to execute: " << std::hex << opcode << "\n";
 
   // Decode opcode
   switch (opcode & 0xF000) {
@@ -82,7 +93,7 @@ void Chip8::emulateCycle() {
       break;
 
     default:
-      std::cout << "Unknown opcode: " << std::hex << opcode << std::endl;
+      std::cout << "Unknown opcode: " << std::hex << opcode << "\n";
       break;
     }
     break;
@@ -194,7 +205,7 @@ void Chip8::emulateCycle() {
       break;
       
       default:
-	std::cout << "Unknown opcode: " << std::hex << opcode << std::endl;
+	std::cout << "Unknown opcode: " << std::hex << opcode << "\n";
 	break;
     }
     break;
@@ -239,7 +250,6 @@ void Chip8::emulateCycle() {
       
       for (int row = 0; row < height; row++) {
         unsigned short byteSprite = memory[I + row];
-        std::cout << "byteSprite: " << std::bitset<8>(byteSprite) << std::endl;
 
 	for (int col = 0; col < width; col++) {
           unsigned short bit = (0x80 >> col);
@@ -280,7 +290,7 @@ void Chip8::emulateCycle() {
       break;
 
     default:
-      std::cout << "Unknown opcode: " << std::hex << opcode << std::endl;
+      std::cout << "Unknown opcode: " << std::hex << opcode << "\n";
       break;
     }
     break;
@@ -294,6 +304,22 @@ void Chip8::emulateCycle() {
 
     case 0x000A: // FX0A
       // TODO
+      {
+        unsigned short X = (opcode & 0x0F00) >> 8;
+        bool keyPressed = false;
+
+        for (int i = 0; i < KEYS_LENGTH; i++) {
+          if (keys[i] != 0) {
+            V[X] = i; // pressed
+            keyPressed = true;
+          }
+        }
+        
+        if (!keyPressed)
+          return;
+        
+        pc += 2;
+      }
       break;
 
     case 0x0015: // FX15
@@ -350,13 +376,13 @@ void Chip8::emulateCycle() {
       break;
       
     default:
-      std::cout << "Unknown opcode: " << std::hex << opcode << std::endl;
+      std::cout << "Unknown opcode: " << std::hex << opcode << "\n";
       break;
     }
     break;
     
   default:
-    std::cout << "Unknown opcode: " << std::hex << opcode << std::endl;
+    std::cout << "Unknown opcode: " << std::hex << opcode << "\n";
     break;
   }
 
